@@ -445,7 +445,25 @@ func setupKernelTunables(option KernelTunableBehavior) error {
 	}
 	return utilerrors.NewAggregate(errList)
 }
+func registerAttestationAgent(pid int) {
 
+	cgroupPath := ""
+	fmt.Sprintf(cgroupPath,"/proc/%d/ns/cgroup", pid)
+
+	symlink, err := os.Readlink(cgroupPath)
+	if err != nil {
+                return
+        }
+
+	split := strings.Split(symlink, "[")
+
+	split = strings.Split(split[1], "]")
+
+
+	fmt.Printf("CGroup Namespace of new container %s\n", split[0])
+
+
+}
 func (cm *containerManagerImpl) setupNode(activePods ActivePodsFunc) error {
 	f, err := validateSystemRequirements(cm.mountUtil)
 	if err != nil {
@@ -522,6 +540,7 @@ func (cm *containerManagerImpl) setupNode(activePods ActivePodsFunc) error {
 		})
 	}
 
+	registerAttestationAgent(os.Getpid())
 	cm.systemContainers = systemContainers
 	return nil
 }
