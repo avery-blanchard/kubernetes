@@ -67,6 +67,7 @@ import (
 	"k8s.io/kubernetes/pkg/kubelet/status"
 	schedulerframework "k8s.io/kubernetes/pkg/scheduler/framework"
 	"k8s.io/kubernetes/pkg/util/oom"
+	//attestationagent "k8s.io/kubernetes/pkg/cm/attestation"
 )
 
 // A non-user container tracked by the Kubelet.
@@ -132,6 +133,7 @@ type containerManagerImpl struct {
 	topologyManager topologymanager.Manager
 	// Interface for Dynamic Resource Allocation management.
 	draManager dra.Manager
+	// Interface for Attestation 
 }
 
 type features struct {
@@ -445,22 +447,45 @@ func setupKernelTunables(option KernelTunableBehavior) error {
 	}
 	return utilerrors.NewAggregate(errList)
 }
-func registerAttestationAgent(pid int) {
+/*
+ * Attestation: parseConatainerLinuxNS
+ * 	Get Linux NS of container process to match 
+ * 	OS-level perspective for IMA log parsing
+ */
+func parseContainerLinuxNS(pid int) string, err {
 
 	cgroupPath := ""
-	fmt.Sprintf(cgroupPath,"/proc/%d/ns/cgroup", pid)
+        fmt.Sprintf(cgroupPath,"/proc/%d/ns/cgroup", pid)
 
-	symlink, err := os.Readlink(cgroupPath)
-	if err != nil {
-                return
+        symlink, err := os.Readlink(cgroupPath)
+        if err != nil {
+                return err
         }
 
-	split := strings.Split(symlink, "[")
+        split := strings.Split(symlink, "[")
 
-	split = strings.Split(split[1], "]")
+        split = strings.Split(split[1], "]")
+
+        ns := split[0]
 
 
-	fmt.Printf("CGroup Namespace of new container %s\n", split[0])
+	return ns
+}
+/*
+ * Attestation: registerAttestationAgent
+ * 	Get Linux NS of new container process
+ * 	and tell Keylime this information 
+ * 	to parse IMA logs for container
+ */
+func registerAttestationAgent(pid int) {
+
+	ns, err := parseContainerLinuxNS(pid)
+	if err != nil {
+		return
+	}
+
+	
+	// Tell keylime NS
 
 
 }
