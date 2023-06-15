@@ -67,7 +67,7 @@ import (
 	"k8s.io/kubernetes/pkg/kubelet/status"
 	schedulerframework "k8s.io/kubernetes/pkg/scheduler/framework"
 	"k8s.io/kubernetes/pkg/util/oom"
-	//attestationagent "k8s.io/kubernetes/pkg/cm/attestation"
+	attestationagent "k8s.io/kubernetes/pkg/cm/container_attestation_agent"
 )
 
 // A non-user container tracked by the Kubelet.
@@ -447,48 +447,6 @@ func setupKernelTunables(option KernelTunableBehavior) error {
 	}
 	return utilerrors.NewAggregate(errList)
 }
-/*
- * Attestation: parseConatainerLinuxNS
- * 	Get Linux NS of container process to match 
- * 	OS-level perspective for IMA log parsing
- */
-func parseContainerLinuxNS(pid int) string, err {
-
-	cgroupPath := ""
-        fmt.Sprintf(cgroupPath,"/proc/%d/ns/cgroup", pid)
-
-        symlink, err := os.Readlink(cgroupPath)
-        if err != nil {
-                return err
-        }
-
-        split := strings.Split(symlink, "[")
-
-        split = strings.Split(split[1], "]")
-
-        ns := split[0]
-
-
-	return ns
-}
-/*
- * Attestation: registerAttestationAgent
- * 	Get Linux NS of new container process
- * 	and tell Keylime this information 
- * 	to parse IMA logs for container
- */
-func registerAttestationAgent(pid int) {
-
-	ns, err := parseContainerLinuxNS(pid)
-	if err != nil {
-		return
-	}
-
-	
-	// Tell keylime NS
-
-
-}
 func (cm *containerManagerImpl) setupNode(activePods ActivePodsFunc) error {
 	f, err := validateSystemRequirements(cm.mountUtil)
 	if err != nil {
@@ -565,7 +523,7 @@ func (cm *containerManagerImpl) setupNode(activePods ActivePodsFunc) error {
 		})
 	}
 
-	registerAttestationAgent(os.Getpid())
+	attestationagent.registerAttestationAgent(os.Getpid())
 	cm.systemContainers = systemContainers
 	return nil
 }
