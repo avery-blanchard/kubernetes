@@ -75,4 +75,13 @@ func registerAttestationAgent(pid int) {
 
 
 }
+func containerAttestationService() {
 
+	// Read logs for PCR 11
+	// Parse NS from log
+	// If NS is a container (registered with kubernetes aka in the mapping) then log measurement
+	// ...
+	// Check per NS policy 
+	// If violation, report to container manager through NS -> pid mapping?
+
+}
