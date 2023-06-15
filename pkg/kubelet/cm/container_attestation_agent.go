@@ -21,7 +21,7 @@ func attestNewNS(ns string) {
 
 	nsMappings.map[ns] := ""
 
-	// Go back throw the log and gather measurements 
+	// Check the log and gather measurements 
 	// from before we got the NS (likely containerd runc 
 	// measurements??)
 
